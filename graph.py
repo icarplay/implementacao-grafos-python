@@ -213,6 +213,12 @@ class Graph(object):
 
 		return caminho
 
+	def caminhoHamiltonianoHelper(self, node: str):
+		pass
+
+	def caminhoHamiltonianoRun(self, node: str):
+		pass
+
 	def showGraph(self):
 		'''
 		Descrição:
