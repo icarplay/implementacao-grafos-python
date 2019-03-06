@@ -7,18 +7,18 @@ class Graph(object):
 		self.directed = directed
 
 	def newNode(self, node: str):
-		if not node.lower() in self.nodesList:
+		if node.lower() not in self.nodesList:
 			self.nodesList.append( node.lower() )
 			self.orderListNodes()
 
 	def newEdge(self, inputGraph: str, outputGraph: str):
 
 		if self.directed:
-			if not tuple((inputGraph.lower(), outputGraph.lower())) in self.edgesList:
+			if tuple((inputGraph.lower(), outputGraph.lower())) not in self.edgesList:
 				self.edgesList.append( tuple((inputGraph.lower(), outputGraph.lower())) )
 				self.orderListEdges()
 		else:
-			if not tuple((inputGraph.lower(), outputGraph.lower())) in self.edgesList:
+			if tuple((inputGraph.lower(), outputGraph.lower())) not in self.edgesList:
 				if inputGraph.lower() == outputGraph.lower():
 					self.edgesList.append( tuple((inputGraph.lower(), outputGraph.lower())) )
 				else:
@@ -242,7 +242,7 @@ if __name__ == "__main__":
 
 	# Teste Euleriano Complexo
 	vertices = [ 'A', 'B', 'C', 'D', 'E', 'F']
-	arestas = [ ('A', 'B'), ('A', 'C'), ('A','E'), ('A', 'F'), ('B', 'E'), ('B', 'D'), ('B', 'C'), ('C', 'E'), ('C', 'D'), ('E','D'), ('F', 'D')]
+	arestas = [ ('A', 'B'), ('A', 'B'), ('A', 'C'), ('A','E'), ('A', 'F'), ('B', 'E'), ('B', 'D'), ('B', 'C'), ('C', 'E'), ('C', 'D'), ('E','D'), ('F', 'D')]
 
 	for i in vertices:
 		a.newNode(i)
