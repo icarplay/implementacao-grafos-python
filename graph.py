@@ -222,24 +222,29 @@ class Graph(object):
 		print(self.nodesList)
 		print(self.edgesList)
 
-a = Graph(directed=False)
 
-# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' ]
-# arestas = [ ('A', 'A'), ('A', 'B'), ('B','A'), ('B', 'C'), ('C', 'D'), ('A', 'E'), ('F', 'G') ]
+if __name__ == "__main__":
+	
+	a = Graph(directed=False)
 
-# Teste Euleriano Simples
-# vertices = [ 'A', 'B', 'C', 'D', 'E' ]
-# arestas = [ ('A', 'B'), ('B', 'D'), ('D','E'), ('E', 'C'), ('C', 'A'), ('B', 'A')]
+	# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' ]
+	# arestas = [ ('A', 'A'), ('A', 'B'), ('B','A'), ('B', 'C'), ('C', 'D'), ('A', 'E'), ('F', 'G') ]
 
-# Teste Euleriano Complexo
-vertices = [ 'A', 'B', 'C', 'D', 'E', 'F']
-arestas = [ ('A', 'B'), ('A', 'C'), ('A','E'), ('A', 'F'), ('B', 'E'), ('B', 'D'), ('B', 'C'), ('C', 'E'), ('C', 'D'), ('E','D'), ('F', 'D')]
+	# Teste Euleriano Simples
+	# vertices = [ 'A', 'B', 'C', 'D', 'E' ]
+	# arestas = [ ('A', 'B'), ('B', 'D'), ('D','E'), ('E', 'C'), ('C', 'A'), ('B', 'A')]
 
-for i in vertices:
-	a.newNode(i)
+	# Teste Euleriano Complexo
+	vertices = [ 'A', 'B', 'C', 'D', 'E', 'F']
+	arestas = [ ('A', 'B'), ('A', 'C'), ('A','E'), ('A', 'F'), ('B', 'E'), ('B', 'D'), ('B', 'C'), ('C', 'E'), ('C', 'D'), ('E','D'), ('F', 'D')]
 
-for sai, entra in arestas:
-	a.newEdge(sai, entra)
+	for i in vertices:
+		a.newNode(i)
 
-# Trilha Euleriana
-print(a.trilhaEulerianaHelper('A'))
+	for sai, entra in arestas:
+		a.newEdge(sai, entra)
+
+	a.showGraph()
+
+	# Trilha Euleriana
+	# print(a.trilhaEulerianaHelper('A'))
