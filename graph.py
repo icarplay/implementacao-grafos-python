@@ -1,4 +1,5 @@
 
+
 class Graph(object):
 
 	def __init__(self, directed = False):
@@ -64,6 +65,41 @@ class Graph(object):
 					adjacencys.append(i[0])
 
 		return adjacencys
+
+	def AdjacencyList(self):
+
+		self.adjacency_list = {}
+
+		for i in self.nodesList:
+
+			self.adjacency_list[i] = []
+
+		for j in self.edgesList:
+
+			self.adjacency_list[j[0]].append(j[1])
+			self.adjacency_list[j[1]].append(j[0])
+
+	def AdjacencyMatrix(self):
+
+		self.adjacency_matrix = []
+		self.tradutorVertices = {}
+
+		contador = 0
+
+		for i in self.nodesList:
+
+			self.adjacency_matrix.append([ 0 for i in range(0, len(self.nodesList)) ])
+			self.tradutorVertices[i] = contador
+			self.tradutorVertices[contador] = i
+			contador += 1
+
+		for j in self.edgesList:
+
+			posA = self.tradutorVertices[j[0]]
+			posB = self.tradutorVertices[j[1]]
+
+			self.adjacency_matrix[posA][posB] = 1
+			self.adjacency_matrix[posB][posA] = 1
 
 	def degrees(self, node: str, list_adjacency = False) -> (int, list):
 
@@ -213,36 +249,80 @@ class Graph(object):
 
 		return caminho
 
-	def caminhoHamiltonianoHelper(self, node: str):
-		pass
-
-	def caminhoHamiltonianoRun(self, node: str):
-		pass
-
 	def showGraph(self):
 		'''
 		Descrição:
 		exibe os vértices e as arestas do grafo
 		'''
+		for i in self.adjacency_matrix:
+			print(i)
 
-		print(self.nodesList)
-		print(self.edgesList)
+	def isSafe(self, v, pos, path): 
 
+		if self.adjacency_matrix[ path[pos-1] ][v] == 0: 
+			return False
+
+		for vertex in path: 
+			if vertex == v: 
+				return False
+  
+		return True
+
+	def hamCycleUtil(self, path, pos): 
+  
+		if pos == len(self.nodesList):
+
+			if self.adjacency_matrix[ path[pos-1] ][ path[0] ] == 1: 
+				return True
+			else: 
+				return False
+
+		for v in range(1, len(self.nodesList)):
+  
+			if self.isSafe(v, pos, path) == True: 
+  
+				path[pos] = v 
+  
+				if self.hamCycleUtil(path, pos+1) == True: 
+					return True
+
+				path[pos] = -1
+  
+		return False
+  
+	def hamCycle(self): 
+		path = [-1] * len(self.nodesList)
+
+		path[0] = 0
+
+		if self.hamCycleUtil(path,1) == False:
+			print("Não Existe Solução\n")
+			return False
+
+		self.printSolution(path) 
+		return True
+  
+	def printSolution(self, path): 
+		print("Existe Solução: ")
+		for vertex in path:
+			print(self.tradutorVertices[vertex])
+		print(self.tradutorVertices[0], "\n")
 
 if __name__ == "__main__":
 	
 	a = Graph(directed=False)
 
-	# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' ]
-	# arestas = [ ('A', 'A'), ('A', 'B'), ('B','A'), ('B', 'C'), ('C', 'D'), ('A', 'E'), ('F', 'G') ]
+	# Não Euleriano
+	vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' ]
+	arestas = [ ('A', 'A'), ('A', 'B'), ('B','A'), ('B', 'C'), ('C', 'D'), ('A', 'E'), ('F', 'G')]
 
 	# Teste Euleriano Simples
 	# vertices = [ 'A', 'B', 'C', 'D', 'E' ]
-	# arestas = [ ('A', 'B'), ('B', 'D'), ('D','E'), ('E', 'C'), ('C', 'A'), ('B', 'A')]
+	# arestas = [ ('A', 'B'), ('B', 'D'), ('D','E'), ('E', 'C'), ('C', 'A')]
 
 	# Teste Euleriano Complexo
-	vertices = [ 'A', 'B', 'C', 'D', 'E', 'F']
-	arestas = [ ('A', 'B'), ('A', 'B'), ('A', 'C'), ('A','E'), ('A', 'F'), ('B', 'E'), ('B', 'D'), ('B', 'C'), ('C', 'E'), ('C', 'D'), ('E','D'), ('F', 'D')]
+	# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F']
+	# arestas = [ ('A', 'B'), ('A', 'B'), ('A', 'C'), ('A','E'), ('A', 'F'), ('B', 'E'), ('B', 'D'), ('B', 'C'), ('C', 'E'), ('C', 'D'), ('E','D'), ('F', 'D')]
 
 	for i in vertices:
 		a.newNode(i)
@@ -250,7 +330,13 @@ if __name__ == "__main__":
 	for sai, entra in arestas:
 		a.newEdge(sai, entra)
 
-	a.showGraph()
+	a.AdjacencyList()
+	a.AdjacencyMatrix()
+
+	# a.showGraph()
 
 	# Trilha Euleriana
-	# print(a.trilhaEulerianaHelper('A'))
+	# print(a.trilhaEulerianaHelper('D'))
+
+	# Ciclo Hamiltoniano
+	# a.hamCycle()
