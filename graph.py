@@ -7,6 +7,8 @@ class Graph(object):
 		self.edgesList = []
 		self.directed = directed
 
+		self.time = 0
+
 	def newNode(self, node: str):
 		if node.lower() not in self.nodesList:
 			self.nodesList.append( node.lower() )
@@ -308,13 +310,148 @@ class Graph(object):
 			print(self.tradutorVertices[vertex])
 		print(self.tradutorVertices[0], "\n")
 
+	def componentesConexos(self):
+		"""
+		Descrição:
+		Esta é uma função para a contagem de componentes conexos
+		"""
+		cc = {}
+
+		self.idComponente = 0
+
+		for i in self.nodesList:
+			cc[i] = -1
+
+		for i in self.nodesList:
+			if cc[i] == -1:
+				self.idComponente += 1
+				self.dfsRcc(cc, i)
+		print(cc)
+
+		return self.idComponente
+
+	def dfsRcc(self, cc, node):
+		cc[node] = self.idComponente
+		for i in self.adjacencyNodes(node):
+			if cc[i] == -1:
+				self.dfsRcc(cc, i)
+
+	# def pontesDFS(self):
+	# 	self.pre = {}
+	# 	self.pa = {}
+
+	# 	self.idComponente = 0
+
+	# 	for i in self.nodesList:
+	# 		self.pre[i] = -1
+
+	# 	for i in self.nodesList:
+	# 		if self.pre[i] == -1:
+	# 			self.pa[i] = i
+	# 			self.pontesDFSVisita(i)
+		
+		
+
+	# def pontesDFSVisita(self, node):
+	# 	self.idComponente += 1
+	# 	self.pre[node] = self.idComponente
+
+	# 	for i in self.adjacencyNodes(node):
+	# 		if self.pre[i] == -1:
+	# 			self.pa[i] = node
+	# 			self.pontesDFSVisita(i)
+
+	# def pontes(self):
+
+	# 	self.pontesDFS()
+
+	# 	self.vv = {}
+
+	# 	for i in self.nodesList:
+	# 		self.vv[self.pre[i]] = i
+		
+	# 	for i in range(len(self.nodesList) - 1, -1, -1):
+	# 		# print(i)
+	# 		v = self.vv[i]
+	# 		mini = self.pre[v]
+
+	# 		for adj in self.adjacencyNodes(v):
+	# 			if self.pre[adj] 
+
+	# def buscarAdjacente(self, node: str):
+
+	# 	for adj in self.adjacencyNodes(node):
+
+	# 		if ( adj not in self.visitados ):
+	# 			self.visitados[adj] = 1
+	# 			return adj
+	# 	else:
+	# 		return None
+
+	def articulacao(self, node, visited: dict = {}, ap: dict = {}, parent: dict = {}, low: dict = {}, disc: dict = {}):
+
+		children = 0
+
+		visited[node] = True
+
+		disc[node] = self.time
+		low[node] = self.time
+
+		self.time+=1
+
+		for adj in self.adjacencyNodes(node):
+			
+			if visited[adj] == False:
+				parent[adj] = node
+				children+=1
+
+				self.articulacao(adj, visited, ap, parent, low, disc)
+		
+				low[node] = min(low[node], low[adj])
+
+				if parent[node] == -1 and children > 1:
+					ap[node] = True
+
+				if parent[node] != -1 and low[adj] >= disc[node]:
+					ap[node] = True
+			
+			elif adj != parent[node]:
+				low[node] = min(low[node], disc[adj])
+
+
+	def articulacaoHelper(self):
+		
+		visited = {}
+		disc = {}
+		low = {}
+		parent = {}
+		ap = {}
+
+		for i in self.nodesList:
+			visited[i] = False
+			disc[i] = float("Inf")
+			low[i] = float("Inf")
+			parent[i] = -1
+			ap[i] = False
+
+		for i in self.nodesList:
+			if visited[i] == False:
+				self.articulacao(i, visited, ap, parent, low, disc)
+		
+		for i in ap:
+			if ap[i] == True:
+				print('Articulação:', i)
+
+		
+
+
 if __name__ == "__main__":
 	
 	a = Graph(directed=False)
 
 	# Não Euleriano
-	vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' ]
-	arestas = [ ('A', 'A'), ('A', 'B'), ('B','A'), ('B', 'C'), ('C', 'D'), ('A', 'E'), ('F', 'G')]
+	# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' ]
+	# arestas = [ ('A', 'A'), ('A', 'B'), ('B','A'), ('B', 'C'), ('C', 'D'), ('A', 'E'), ('F', 'G')]
 
 	# Teste Euleriano Simples
 	# vertices = [ 'A', 'B', 'C', 'D', 'E' ]
@@ -323,6 +460,10 @@ if __name__ == "__main__":
 	# Teste Euleriano Complexo
 	# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F']
 	# arestas = [ ('A', 'B'), ('A', 'B'), ('A', 'C'), ('A','E'), ('A', 'F'), ('B', 'E'), ('B', 'D'), ('B', 'C'), ('C', 'E'), ('C', 'D'), ('E','D'), ('F', 'D')]
+
+	# Teste de grafo simples com ligação únicas
+	vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G' ]
+	arestas = [ ('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'E'), ('E', 'F'), ('E', 'G'), ('G', 'F') ]
 
 	for i in vertices:
 		a.newNode(i)
@@ -336,7 +477,15 @@ if __name__ == "__main__":
 	# a.showGraph()
 
 	# Trilha Euleriana
-	# print(a.trilhaEulerianaHelper('D'))
+	# print(a.trilhaEulerianaHelper('A'))
 
 	# Ciclo Hamiltoniano
 	# a.hamCycle()
+
+	# Componentes
+	# print('Componentes:',a.components('A'))
+
+	# Componentes Conexos
+	# print(a.componentesConexos())
+	
+	a.articulacaoHelper()
