@@ -55,18 +55,8 @@ class Graph(object):
 				return None
 
 	def adjacencyNodes(self, node: str) -> list:
-		adjacencys = []
 
-		for i in self.edgesList:
-			if node.lower() in i:
-				if node.lower() == i[0] and node.lower() == i[1]:
-					adjacencys.append(i[0])
-				elif node.lower() == i[0]:
-					adjacencys.append(i[1])
-				else:
-					adjacencys.append(i[0])
-
-		return adjacencys
+		return self.adjacency_list[node]
 
 	def AdjacencyList(self):
 
@@ -78,8 +68,11 @@ class Graph(object):
 
 		for j in self.edgesList:
 
-			self.adjacency_list[j[0]].append(j[1])
-			self.adjacency_list[j[1]].append(j[0])
+			if self.directed:
+				self.adjacency_list[j[0]].append(j[1])				
+			else:
+				self.adjacency_list[j[0]].append(j[1])
+				self.adjacency_list[j[1]].append(j[0])
 
 	def AdjacencyMatrix(self):
 
@@ -102,6 +95,8 @@ class Graph(object):
 
 			self.adjacency_matrix[posA][posB] = 1
 			self.adjacency_matrix[posB][posA] = 1
+		
+		# print(self.adjacency_matrix)
 
 	def degrees(self, node: str, list_adjacency = False) -> (int, list):
 
@@ -442,12 +437,32 @@ class Graph(object):
 			if ap[i] == True:
 				print('Articulação:', i)
 
-		
+	def menorDistancia(self, node):
 
+		distancia = {}
+		visitados = [node]
+
+		for i in self.nodesList:
+			distancia[i] = None
+
+		t = 0
+		distancia[node] = t
+		fila = [node]
+
+		while (len(fila) != 0):
+			vertex = fila.pop()
+			for adj in self.adjacencyNodes(vertex):
+				if adj not in visitados:
+					visitados.append(adj)
+					fila.append(adj)
+					if distancia[adj] == None:
+						distancia[adj] = distancia[vertex] + 1
+
+		print(distancia)
 
 if __name__ == "__main__":
 	
-	a = Graph(directed=False)
+	a = Graph(directed=True)
 
 	# Não Euleriano
 	# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' ]
@@ -462,8 +477,15 @@ if __name__ == "__main__":
 	# arestas = [ ('A', 'B'), ('A', 'B'), ('A', 'C'), ('A','E'), ('A', 'F'), ('B', 'E'), ('B', 'D'), ('B', 'C'), ('C', 'E'), ('C', 'D'), ('E','D'), ('F', 'D')]
 
 	# Teste de grafo simples com ligação únicas
+	# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'K' ]
+	# arestas = [ ('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'E'), ('D','K'), ('E', 'F'), ('E', 'G'), ('G', 'F') ]
+
+	# Algoritmo Genérico
 	vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G' ]
-	arestas = [ ('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'E'), ('E', 'F'), ('E', 'G'), ('G', 'F') ]
+	arestas = [ 
+				('A', 'B'), ('A', 'D'), ('B', 'D'), ('B', 'E'), ('C', 'A'), ('C', 'F'), 
+				('D', 'C'), ('D', 'F'), ('D', 'G'), ('D', 'E'), ('E', 'G'), ('G', 'F')
+			  ]
 
 	for i in vertices:
 		a.newNode(i)
@@ -488,4 +510,6 @@ if __name__ == "__main__":
 	# Componentes Conexos
 	# print(a.componentesConexos())
 	
-	a.articulacaoHelper()
+	# a.articulacaoHelper()
+
+	a.menorDistancia('c')
