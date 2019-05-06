@@ -3,7 +3,7 @@ class Graph:
     def __init__(self,graph):
         self.graph = graph # residual graph
         self.org_graph = [i[:] for i in graph]
-        self. ROW = len(graph)
+        self.ROW = len(graph)
         self.COL = len(graph[0])
 
 
@@ -78,7 +78,7 @@ class Graph:
         for i in range(self.ROW):
             for j in range(self.COL):
                 if self.graph[i][j] == 0 and self.org_graph[i][j] > 0:
-                    print str(i) + " - " + str(j)
+                    print(str(i) + " - " + str(j))
 
 
 # Create a graph given in the above diagram
