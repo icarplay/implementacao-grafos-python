@@ -6,6 +6,7 @@ class Graph(object):
 		self.nodesList = []
 		self.edgesList = []
 		self.directed = directed
+		self.nodesWithWeight = {}
 
 		self.time = 0
 
@@ -14,18 +15,18 @@ class Graph(object):
 			self.nodesList.append( node.lower() )
 			self.orderListNodes()
 
-	def newEdge(self, inputGraph: str, outputGraph: str):
+	def newEdge(self, inputGraph: str, outputGraph: str, weigth = 0):
 
 		if self.directed:
-			if tuple((inputGraph.lower(), outputGraph.lower())) not in self.edgesList:
-				self.edgesList.append( tuple((inputGraph.lower(), outputGraph.lower())) )
+			if tuple((inputGraph.lower(), outputGraph.lower(), weigth)) not in self.edgesList:
+				self.edgesList.append( tuple((inputGraph.lower(), outputGraph.lower(), weigth)) )
 				self.orderListEdges()
 		else:
-			if tuple((inputGraph.lower(), outputGraph.lower())) not in self.edgesList:
+			if tuple((inputGraph.lower(), outputGraph.lower(), weigth)) not in self.edgesList:
 				if inputGraph.lower() == outputGraph.lower():
-					self.edgesList.append( tuple((inputGraph.lower(), outputGraph.lower())) )
+					self.edgesList.append( tuple((inputGraph.lower(), outputGraph.lower(), weigth)) )
 				else:
-					self.edgesList.append( tuple((inputGraph.lower(), outputGraph.lower())) )
+					self.edgesList.append( tuple((inputGraph.lower(), outputGraph.lower(), weigth)) )
 				self.orderListEdges()
 	
 	def orderListEdges(self):
@@ -90,13 +91,25 @@ class Graph(object):
 
 		for j in self.edgesList:
 
-			posA = self.tradutorVertices[j[0]]
-			posB = self.tradutorVertices[j[1]]
+			if (len(j) == 2):
 
-			self.adjacency_matrix[posA][posB] = 1
-			self.adjacency_matrix[posB][posA] = 1
-		
-		# print(self.adjacency_matrix)
+				posA = self.tradutorVertices[j[0]]
+				posB = self.tradutorVertices[j[1]]
+
+				if (not self.directed):
+					self.adjacency_matrix[posB][posA] = 1
+
+				self.adjacency_matrix[posA][posB] = 1
+			
+			else:
+				
+				posA = self.tradutorVertices[j[0]]
+				posB = self.tradutorVertices[j[1]]
+
+				if (not self.directed):
+					self.adjacency_matrix[posB][posA] = j[2]
+
+				self.adjacency_matrix[posA][posB] = j[2]
 
 	def degrees(self, node: str, list_adjacency = False) -> (int, list):
 
@@ -460,6 +473,87 @@ class Graph(object):
 
 		print(distancia)
 
+	def doesEdgeExists(self, a, b):
+		a = self.tradutorVertices[a]
+		b = self.tradutorVertices[b]
+		for edge in self.edgesList:
+			if ( edge[0] == a and edge[1] == b ):
+				if (len(edge) == 3):
+					return (True, edge[2])
+				else:
+					return (True, 0)
+		return (False, None)
+
+	def _floydWarshallPath(self, start, finish, matrix, recurrenceMatrix):
+
+		startPosition = self.tradutorVertices[start]
+		finishPosition = self.tradutorVertices[finish]
+		
+		goTo = recurrenceMatrix[startPosition][finishPosition]
+		goToPosition = self.tradutorVertices[goTo]
+
+		goTo = recurrenceMatrix[startPosition][goToPosition]
+
+		if start != finish:
+			path = self._floydWarshallPath(goTo, finish, matrix, recurrenceMatrix)
+			if goTo in path:
+				return path
+			else:
+				return [ goTo ] + path
+		else:
+			return [ finish ]
+
+	def printPath(self, start, finish, matrix, recurrenceMatrix):
+
+		path = [start] + self._floydWarshallPath(start, finish, matrix, recurrenceMatrix)
+
+		cost = matrix[self.tradutorVertices[start]][self.tradutorVertices[finish]]
+
+		print('Found Path! Minimum Cost for {} to {} = {}'.format(start.upper(), finish.upper(), cost))
+
+		for i in range(len(path)):
+			if i < len(path) - 1:
+				print(path[i] + ' --> ', end='')
+			else:
+				print(path[i])
+		
+		return path
+
+	def floydWarshall(self, start = '', finish = ''):
+		
+		start = start.lower()
+		finish = finish.lower()
+
+		infinity = float('inf')
+
+		matrix = [ [ infinity for i in range(len(self.nodesList)) ] for j in range(len(self.nodesList)) ]
+
+		recurrenceMatrix = [ [ i for i in self.nodesList ] for j in range(len(self.nodesList)) ]
+
+		for i in range(len(matrix)):
+			for j in range(len(matrix)):
+				if i == j:
+					matrix[i][j] = 0
+
+				exists, weigth = self.doesEdgeExists(i, j)
+
+				if (exists):
+					matrix[i][j] = weigth
+
+		for k in range(len(matrix)):
+			for i in range(len(matrix)):
+				for j in range(len(matrix)):
+					distance = matrix[i][k] + matrix[k][j]
+					if ( distance < matrix[i][j] ):
+						matrix[i][j] = distance
+						recurrenceMatrix[i][j] = self.tradutorVertices[k]
+
+		if start != '' and finish != '':
+			path = self.printPath(start, finish, matrix, recurrenceMatrix)
+			return matrix, recurrenceMatrix, path
+		else:
+			return matrix, recurrenceMatrix
+
 if __name__ == "__main__":
 	
 	a = Graph(directed=True)
@@ -481,17 +575,48 @@ if __name__ == "__main__":
 	# arestas = [ ('A', 'B'), ('B', 'C'), ('C', 'D'), ('D', 'E'), ('D','K'), ('E', 'F'), ('E', 'G'), ('G', 'F') ]
 
 	# Algoritmo Genérico
-	vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G' ]
-	arestas = [ 
-				('A', 'B'), ('A', 'D'), ('B', 'D'), ('B', 'E'), ('C', 'A'), ('C', 'F'), 
-				('D', 'C'), ('D', 'F'), ('D', 'G'), ('D', 'E'), ('E', 'G'), ('G', 'F')
-			  ]
+	# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F', 'G' ]
+	# arestas = [ 
+	# 			('A', 'B'), ('A', 'D'), ('B', 'D'), ('B', 'E'), ('C', 'A'), ('C', 'F'), 
+	# 			('D', 'C'), ('D', 'F'), ('D', 'G'), ('D', 'E'), ('E', 'G'), ('G', 'F')
+	# 		  ]
+
+	# vertices = [ 'A', 'B', 'C', 'D', 'E', 'F' ]
+	# arestas = [
+	# 	('A', 'B', 1),
+	# 	('B', 'A', 1),
+	# 	('A', 'C', 2),
+	# 	('C', 'A', 2),
+	# 	('B', 'D', 2),
+	# 	('B', 'E', 4),
+	# 	('C', 'E', 2),
+	# 	('E', 'C', 2),
+	# 	('D', 'F', 6),
+	# 	('E', 'F', 7),
+	# 	('F', 'E', 7),
+	# ]
+
+	vertices = [ 'A', 'B', 'C', 'D', 'E' ]
+	arestas = [
+		('A', 'B', 3),
+		('A', 'C', 8),
+		('A', 'E', -4),
+		('B', 'D', 1),
+		('B', 'E', 7),
+		('C', 'B', 4),
+		('D', 'C', -5),
+		('D', 'A', 2),
+		('E', 'D', 6),
+	]
 
 	for i in vertices:
 		a.newNode(i)
 
-	for sai, entra in arestas:
-		a.newEdge(sai, entra)
+	for sai, entra, peso in arestas:
+		a.newEdge(sai, entra, peso)
+	
+	# for sai, entra in arestas:
+	# 	a.newEdge(sai, entra)
 
 	a.AdjacencyList()
 	a.AdjacencyMatrix()
@@ -512,4 +637,6 @@ if __name__ == "__main__":
 	
 	# a.articulacaoHelper()
 
-	a.menorDistancia('c')
+	# a.menorDistancia('c')
+
+	a.floydWarshall('d', 'e')
